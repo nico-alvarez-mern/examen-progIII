@@ -10,9 +10,7 @@ class JsonMiddleware {
     public function __invoke(Request $request, RequestHandler $handler)
     {
         $response = $handler->handle($request);
-        // $existingContent = (string) $response->getBody();
-
-        // $response = new Response();
+        
         $response = $response->withHeader('Content-type', 'application/json');
 
         return $response;

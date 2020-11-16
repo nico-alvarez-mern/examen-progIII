@@ -6,7 +6,6 @@ use \Firebase\JWT\JWT;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Psr7\Response;
-// use Psr\Http\Message\ResponseInterface as Response;
 
 class AuthMiddleware
 {
@@ -22,7 +21,7 @@ class AuthMiddleware
     {
         $valido = false; // valido token
 
-        $payload = $this->validatorJWT($_SERVER['HTTP_TOKEN']);
+        $payload = $this->validatorJWT($_SERVER['HTTP_TOKEN'] ?? "");
         if($payload != null){
             $valido = true;
         }
@@ -31,6 +30,8 @@ class AuthMiddleware
             $response->getBody()->write('prohibido pasar');
             return $response->withStatus(403);
         } else {
+            $_POST['tipo'] = $payload->tipo;
+            $_POST['idAlumno'] = $payload->id;
             $response = $handler->handle($request);
             $existingContent = (string) $response->getBody();
             $resp = new Response();

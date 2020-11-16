@@ -14,7 +14,7 @@ class Database {
         $capsule->addConnection([
             'driver' => 'mysql',
             'host' => 'localhost',
-            'database' => 'clasesql',
+            'database' => 'examen',
             'username' => 'root',
             'password' => '',
             'charset' => 'utf8',
@@ -22,14 +22,8 @@ class Database {
             'prefix' => '',
         ]);
 
-        // Set the event dispatcher used by Eloquent models... (optional)
-
         $capsule->setEventDispatcher(new Dispatcher(new Container));
-
-        // Make this Capsule instance available globally via static methods... (optional)
         $capsule->setAsGlobal();
-
-        // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
         $capsule->bootEloquent();
     }
 }

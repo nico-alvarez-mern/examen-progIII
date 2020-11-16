@@ -11,19 +11,39 @@ use App\Models\User;
 class LoginController {
 
     public function login (Request $request, Response $response, $args) {
+        $flagEmail = false;
         $body = $request->getParsedBody();
-        if(!validatorPost(['email','password'],$response)){
+        if(!validatorPost(['clave'],$response)){
             return $response;
         }
-        $user = User::where('email','=',$body['email'])
-                    ->where('password','=',$body['password'])
-                    ->get()->first();
+        if(validatorPost(['email'],$response)){
+            $flagEmail = true;
+        }
+        if(!$flagEmail ||  !validatorPost(['nombre'],$response) ){
+            return $response;
+        }
 
+        $user = null;
+
+        if($flagEmail){
+            $user = User::where('email','=',$body['email'])
+                    ->where('clave','=',$body['clave'])
+                    ->get()->first();
+        }else{
+            $user = User::where('nombre','=',$body['nombre'])
+                    ->where('clave','=',$body['clave'])
+                    ->get()->first();
+        }
+        
         if( $user == null){
-            $response->getBody()->write('No existe un usuario con ese email o password');
+            $response->getBody()->write('No existe un usuario con ese email, Nombre o password');
             return $response->withStatus(404);
         }else{
-            $resp = array('email' => $user['email'] , 'name' => $user['name'] );
+            $resp = array('email' => $user['email'], 
+                          'nombre' => $user['nombre'], 
+                          'tipo' => $user['tipo'],
+                          'id' => $user['id']
+                    );
             $resp['token'] = $this->createJWT($resp);
             $response->getBody()->write(json_encode($resp));
             return $response->withStatus(200);
@@ -33,23 +53,26 @@ class LoginController {
     public function create (Request $request, Response $response, $args) {
         $body = $request->getParsedBody();
 
-        if(!validatorPost(['email','password','name'],$response)){
+        if(!validatorPost(['email','nombre','clave','tipo'],$response)){
             return $response;
         }
         if(User::where('email','=',$body['email'])->get()->first() != null){
             $response->getBody()->write('Ya existe un usuario con ese email');
             return $response->withStatus(404);
         }
+        if(User::where('nombre','=',$body['nombre'])->get()->first() != null){
+            $response->getBody()->write('Ya existe un usuario con ese nombre');
+            return $response->withStatus(404);
+        }
 
         $user = new User;
         $user->email = $body['email'];
-        $user->password = $body['password'];
-        $user->name = $body['name'];
+        $user->clave = $body['clave'];
+        $user->nombre = $body['nombre'];
+        $user->tipo = $body['tipo'];
 
         if( $user->save() ){
-            $resp = array('email' => $body['email'] , 'name' => $body['name'] );
-            $resp['token'] = $this->createJWT($resp);
-            $response->getBody()->write(json_encode($resp));
+            $response->getBody()->write('Usuario creado con exito');
             return $response->withStatus(201);
         }else{
             $response->getBody()->write('No se pudo crear el usuario');

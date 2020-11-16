@@ -14,9 +14,9 @@ require('../src/Middlewares/JsonMiddleware.php');
 use App\Middlewares\JsonMiddleware;
 use App\Middlewares\AuthMiddleware;
 
-require('../src/Controllers/UsuarioController.php');
+require('../src/Controllers/MateriaController.php');
 require('../src/Controllers/LoginController.php');
-use App\Controllers\AlumnoController;
+use App\Controllers\MateriaController;
 use App\Controllers\LoginController;
 
 
@@ -25,40 +25,29 @@ $conn = new Database;
 $app = AppFactory::create();
 $app->setBasePath('/php/examen-prog/public');
 
-$app->group('/user', function (RouteCollectorProxy $group) {
+$app->group('/', function (RouteCollectorProxy $group) {
 
-    $group->post('/login[/]', LoginController::class . ":login");
-    
-    $group->post('/create[/]', LoginController::class . ":create");
+    $group->post('login[/]', LoginController::class . ":login");
+
+    $group->post('users[/]', LoginController::class . ":create");
     
 
 })->add(new JsonMiddleware);
 
-$app->group('/alumnos', function (RouteCollectorProxy $group) {
+$app->group('/materia', function (RouteCollectorProxy $group) {
 
-    $group->get('[/]', AlumnoController::class . ":getAll");
+    $group->post('[/]', MateriaController::class . ":addOne");
     
-    $group->post('[/]', AlumnoController::class . ":addOne");
+    $group->post('/inscripcion/{idMateria}', MateriaController::class . ":inscription");
     
-    $group->get('/{id}', AlumnoController::class . ":getOne");
+    $group->post('/notas/{idMateria}', MateriaController::class . ":addScore");
 
-    $group->put('/{id}', AlumnoController::class . ":updateOne");
+    $group->get('/inscripcion/{idMateria}', MateriaController::class . ":getInscriptions");
 
-    $group->delete('/{id}', AlumnoController::class . ":deleteOne");
+    $group->get('[/]', MateriaController::class . ":getAll");
+
+    $group->get('/notas/{idMateria}', MateriaController::class . ":getMateriaScore");
 
 })->add(new AuthMiddleware)->add(new JsonMiddleware);
-
-
-
-
-// ->add(function (Request $request, RequestHandler $handler) {
-//     $response = $handler->handle($request);
-//     // $existingContent = (string) $response->getBody();
-
-//     // $response = new Response();
-//     $response = $response->withHeader('Content-type', 'application/json');
-
-//     return $response;
-// });
 
 $app->run();
